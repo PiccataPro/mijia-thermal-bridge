@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        # 3.13 上 netifaces 无 wheel 且源码构建失败，走 --no-deps 路径（README 同款）
+        include:
+          - python-version: "3.11"
+            install: normal
+          - python-version: "3.12"
+            install: normal
+          - python-version: "3.13"
+            install: nodeps
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install deps (normal path)
+        if: matrix.install == 'normal'
+        run: pip install -r requirements.txt
+
+      - name: Install deps (skip netifaces on 3.13)
+        if: matrix.install == 'nodeps'
+        run: |
+          pip install --no-deps python-miio==0.5.12
+          pip install micloud requests click construct cryptography defusedxml \
+                      attrs appdirs croniter pytz PyYAML tqdm zeroconf
+
+      - name: Verify imports
+        run: python -c "from miio import MiotDevice; from micloud import miutils; import requests; print('imports OK')"
+
+      - name: Run control-law timeline test
+        # test_hold.py 读 config.json；仓库只发布 config.example.json（真实配置含 token，不入库）
+        run: |
+          cp config.example.json config.json
+          python test_hold.py
+
+      - name: Smoke-check log2chart on synthetic log
+        run: |
+          python - <<'PY'
+          # 造一份最小日志，确认绘图脚本不炸（不依赖真实设备日志）
+          import io
+          from datetime import datetime, timedelta
+          base = datetime(2026, 10, 24, 12, 0, 0)
+          rows = []
+          for i in range(400):
+              ts = (base + timedelta(seconds=i * 3)).strftime("%Y-%m-%d %H:%M:%S")
+              temp = 40 + (i % 40)
+              pw = 200 + (i % 40) * 15
+              fan = min(100, max(20, (temp - 50) * 5))
+              rows.append(f"{ts}  [LIVE] {temp}°C / {pw}W  温度项 50% / 功率项 50%"
+                          f"  GPU功耗 300W  → 风扇 {fan}%  已下发")
+          io.open("ci_fake.log", "w", encoding="utf-8").write("\n".join(rows) + "\n")
+          PY
+          python tools/log2chart.py ci_fake.log -o /tmp/ci_chart.svg
+          python -c "import xml.etree.ElementTree as ET; ET.parse('/tmp/ci_chart.svg'); print('SVG well-formed')"

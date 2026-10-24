@@ -1,0 +1,82 @@
+{
+  "_note": "米家设备本地控制配置（局域网 miIO，不依赖云端）。复制为 config.json 后填入自己的设备信息。",
+  "network": {
+    "_note": "仅作文档备注用，代码不读取。控制机需与设备同网段（能直连设备 IP 的 UDP 54321）",
+    "wlan_ssid": "Your-WiFi-SSID",
+    "controller_ip": "192.168.1.10",
+    "require_wlan": true
+  },
+  "devices": {
+    "plug": {
+      "name": "小米智能插座4",
+      "model": "xiaomi.plug.04",
+      "ip": "192.168.1.50",
+      "token": "REPLACE_32_HEX_TOKEN",
+      "props": {
+        "switch": [2, 1],
+        "power_w": [11, 1],
+        "power_w_int": [11, 2],
+        "rated_power": [3, 2],
+        "rated_current": [3, 3]
+      }
+    },
+    "purifier": {
+      "_note": "可选。默认不参与联动，见 thermal_link.purifier_role",
+      "name": "米家空气净化器 4 Pro2",
+      "model": "xiaomi.airp.va2b",
+      "ip": "192.168.1.51",
+      "token": "REPLACE_32_HEX_TOKEN",
+      "props": {
+        "switch": [2, 1],
+        "fault": [2, 2],
+        "mode": [2, 4],
+        "fan_level": [2, 5],
+        "anion": [2, 6],
+        "humidity": [3, 1],
+        "temperature": [3, 2],
+        "air_quality": [3, 3],
+        "pm25": [3, 4],
+        "filter_life": [4, 1],
+        "favorite_level": [14, 1]
+      },
+      "mode_enum": { "0": "auto", "1": "sleep", "2": "favorite" }
+    },
+    "fan": {
+      "name": "米家直流变频台式循环扇",
+      "model": "xiaomi.fan.p69",
+      "ip": "192.168.1.52",
+      "token": "REPLACE_32_HEX_TOKEN",
+      "props": {
+        "switch": [2, 1],
+        "fault": [2, 2],
+        "mode": [2, 4],
+        "speed": [2, 5],
+        "angle": [2, 7]
+      },
+      "speed_range": [1, 100]
+    }
+  },
+  "thermal_link": {
+    "enabled": false,
+    "dry_run": true,
+    "sample_seconds": 1,
+    "temp_start_c": 50,
+    "temp_full_c": 70,
+    "power_start_w": 700,
+    "power_full_w": 800,
+    "idle_floor_percent": 20,
+    "idle_stop_power_w": 200,
+    "idle_wake_power_w": 240,
+    "idle_stop_temp_c": 45,
+    "idle_wake_temp_c": 48,
+    "idle_stop_hold_seconds": 600,
+    "ema_up_seconds": 1.0,
+    "ema_down_seconds": 45.0,
+    "min_change_interval": 2,
+    "drop_delay_seconds": 180,
+    "min_step": 5,
+    "max_speed": 100,
+    "purifier_role": "off",
+    "purifier_note": "净化器不参与温度联动：出风口若无法对准机箱，对显卡降温无实效；保持 auto 常开用于除尘"
+  }
+}

@@ -1,0 +1,16 @@
+# 跨平台：仓库内统一 LF，避免 Linux/macOS 用户拿到 CRLF 的 .py
+* text=auto eol=lf
+
+# Windows 专用脚本必须 CRLF，否则 cmd/wscript 解析会出错
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.vbs text eol=crlf
+
+# 二进制/生成物不做换行转换，也不计入 diff
+*.svg text eol=lf
+*.png binary
+*.db binary
+
+# 语言统计
+*.py linguist-language=Python
+docs/demo.svg linguist-documentation

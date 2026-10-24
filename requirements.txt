@@ -1,0 +1,3 @@
+python-miio==0.5.12
+micloud>=0.5
+requests>=2.31
