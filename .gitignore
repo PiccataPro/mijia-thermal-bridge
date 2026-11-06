@@ -1,21 +1,15 @@
-# 凭据：设备 token 等同局域网控制密钥
-config.json
-location.json
-cloud_devices.json
-devices_full.json
-props_*.json
-sts_state.json
-auth*.json
-login*.txt
-login*.html
-
-# 运行产物
-data/
-*.log
-*.db
-*.db-wal
-*.db-shm
-*.lock
+node_modules/
 .venv/
+venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+.DS_Store
+*.log
+.env
+.env.local
+secrets.json
+config.json
+*.bak
+*.bak_*
+*.bak-*
